@@ -44,4 +44,16 @@ public class Client {
 	    }
 	}	
 	
+	public void Menu(){
+    	System.out.println("Good day, dear User! Welcome to our dorm.\n Please select from the given options:\n"
+    			+"1. Show all rooms\n"
+    			+"2. Occupy a room\n"
+    			+"3. Leave a room\n");
+    	Scanner sc=new Scanner(System.in);
+    	int choice=sc.nextInt();
+    	
+    	sc.close();
+    			
+    }
+	
 }
