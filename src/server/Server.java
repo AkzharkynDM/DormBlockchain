@@ -1,3 +1,4 @@
+package server;
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -52,7 +53,7 @@ class ServerThread extends Thread{
         print = new PrintWriter(s.getOutputStream());        
         
           synchronized(lock){
-        	room = (Room) ois.readObject(); 
+        	Block = (Block) ois.readObject(); 
         	print.println(blockchain.addToBlockChain(block));
             print.flush();
           }        
@@ -70,5 +71,9 @@ class ServerThread extends Thread{
 		}
     	  
       }
+    }
+    
+    public static void main (String[] args){
+    	
     }
 }

@@ -1,3 +1,4 @@
+package client;
 import java.util.Scanner;
 import java.io.*;
 import java.util.*;
@@ -9,7 +10,7 @@ public class Client {
 	private Socket s;
 	private ObjectOutputStream oos;	
 	
-	public Room requestRoom(){
+	public Block requestRoomBlock(){
 		Scanner sc=new Scanner(System.in);
 		System.out.println("Write down the room number");
 		int room_number=sc.nextInt();
@@ -20,7 +21,7 @@ public class Client {
 		System.out.println("Write down the price");
 		int price=sc.nextInt();
 		sc.close();
-		return new Room(room_number, current_tenant, condition, price);		
+		return new Block(room_number, current_tenant, condition, price);		
 	}
 	
 	public void connectToServer(){
@@ -28,7 +29,7 @@ public class Client {
 	          s = new Socket(LOCAL_HOST, 12345);	          
 
 	          oos = new ObjectOutputStream(s.getOutputStream());
-	          oos.writeObject(requestRoom());	         
+	          oos.writeObject(requestRoomBlock());	         
 	         
 	        }catch(Exception e){
 	          System.out.println(e);
@@ -54,6 +55,10 @@ public class Client {
     	
     	sc.close();
     			
+    }
+	
+	public static void main (String[] args){
+    	
     }
 	
 }
