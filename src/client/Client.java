@@ -1,5 +1,4 @@
 package client;
-import java.util.Scanner;
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -9,8 +8,12 @@ public class Client {
 	public final static String LOCAL_HOST="localhost";
 	private Socket s;
 	private ObjectOutputStream oos;	
+	private  PrintWriter print;
 	
-	public Block requestRoomBlock(){
+	private Blockchain blockchain=null;
+	private int choiceToSend;
+	
+	private String requestRoom(){
 		Scanner sc=new Scanner(System.in);
 		System.out.println("Write down the room number");
 		int room_number=sc.nextInt();
@@ -21,15 +24,40 @@ public class Client {
 		System.out.println("Write down the price");
 		int price=sc.nextInt();
 		sc.close();
-		return new Block(room_number, current_tenant, condition, price);		
+		return new String(room_number+";"+ current_tenant+";"+ condition+";"+ price);		
 	}
 	
-	public void connectToServer(){
+	private Block requestBlock(){		
+		return new blockchain.generateNextBlock(requestRoom());
+	}
+	
+	private void connectToServerToSendChoice(){
 		try{
-	          s = new Socket(LOCAL_HOST, 12345);	          
+	          s = new Socket(LOCAL_HOST, PORT_NUMBER);	          
+	          print=new PrintWriter(s.getOutputStream());	         
+	          print.println(choiceToSend);
+	          print.flush();	          
+	         
+	        }catch(Exception e){
+	          System.out.println(e);
+	        }
+		finally{
+			try {
+				s.close();				
+				print.close();
+			} catch (IOException e) {
+				System.out.println("Cannot close"+e);
+			}
+			
+	    }
+	}	
+	
+	private void connectToServerToGetBlock(){
+		try{
+	          s = new Socket(LOCAL_HOST, PORT_NUMBER);	          
 
 	          oos = new ObjectOutputStream(s.getOutputStream());
-	          oos.writeObject(requestRoomBlock());	         
+	          oos.writeObject(requestBlock());	         
 	         
 	        }catch(Exception e){
 	          System.out.println(e);
@@ -43,22 +71,27 @@ public class Client {
 			}
 			
 	    }
-	}	
+	}
 	
-	public void Menu(){
+	private void addToOwnBlockchain(Block block){
+		blockchain.addToBlockchain(block);
+	}
+	
+	private void Menu(){
     	System.out.println("Good day, dear User! Welcome to our dorm.\n Please select from the given options:\n"
     			+"1. Show all rooms\n"
     			+"2. Occupy a room\n"
     			+"3. Leave a room\n");
     	Scanner sc=new Scanner(System.in);
-    	int choice=sc.nextInt();
-    	
+    	choiceToSend=sc.nextInt();    	
     	sc.close();
     			
     }
 	
-	public static void main (String[] args){
-    	
+	public /*static*/ void main (String[] args){
+    	while (true) {
+    		Menu();
+    	}
     }
 	
 }
