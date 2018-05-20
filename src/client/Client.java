@@ -10,7 +10,7 @@ public class Client {
 	private ObjectOutputStream oos;	
 	private  PrintWriter print;
 	
-	private Blockchain blockchain=null;
+	private Blockchain blockchain=new Blockchain();
 	private int choiceToSend;
 	
 	private String requestRoom(){
@@ -27,37 +27,16 @@ public class Client {
 		return new String(room_number+";"+ current_tenant+";"+ condition+";"+ price);		
 	}
 	
-	private Block requestBlock(){		
-		return new blockchain.generateNextBlock(requestRoom());
+	private Block requestBlock(String dataForBlock){		
+		return (Block) blockchain.generateNextBlock(dataForBlock);
 	}
-	
-	private void connectToServerToSendChoice(){
-		try{
-	          s = new Socket(LOCAL_HOST, PORT_NUMBER);	          
-	          print=new PrintWriter(s.getOutputStream());	         
-	          print.println(choiceToSend);
-	          print.flush();	          
-	         
-	        }catch(Exception e){
-	          System.out.println(e);
-	        }
-		finally{
-			try {
-				s.close();				
-				print.close();
-			} catch (IOException e) {
-				System.out.println("Cannot close"+e);
-			}
-			
-	    }
-	}	
-	
-	private void connectToServerToGetBlock(){
+		
+	private void connectToServerToGetBlock(String dataForBlock){
 		try{
 	          s = new Socket(LOCAL_HOST, PORT_NUMBER);	          
 
 	          oos = new ObjectOutputStream(s.getOutputStream());
-	          oos.writeObject(requestBlock());	         
+	          oos.writeObject(requestBlock(dataForBlock));	         
 	         
 	        }catch(Exception e){
 	          System.out.println(e);
@@ -71,6 +50,7 @@ public class Client {
 			}
 			
 	    }
+		addToOwnBlockchain(requestBlock(dataForBlock));
 	}
 	
 	private void addToOwnBlockchain(Block block){
@@ -85,7 +65,12 @@ public class Client {
     	Scanner sc=new Scanner(System.in);
     	choiceToSend=sc.nextInt();    	
     	sc.close();
-    			
+    	switch (choiceToSend){
+    	case 1: connectToServerToGetBlock(String.valueOf(choiceToSend));
+    	case 2: connectToServerToGetBlock(choiceToSend+";"+requestRoom());
+    	case 3:	connectToServerToGetBlock(choiceToSend+";"+requestRoom());
+    	default: System.out.println("Please, enter the number fom the given range");	
+    	}
     }
 	
 	public /*static*/ void main (String[] args){

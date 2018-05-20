@@ -8,8 +8,8 @@ public class Floor {
 	private int numberOfFloor;
 	private String floorAssistant;
 	
-	public Floor(int numberOfFloor, String floorAssistant){
-		roomsPerFloor=new ArrayList<Room>();
+	public Floor(List<Room> roomsPerFloor, int numberOfFloor, String floorAssistant){
+		this.roomsPerFloor=roomsPerFloor;
 		this.numberOfFloor=numberOfFloor;
 		this.floorAssistant=floorAssistant;
 	}

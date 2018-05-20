@@ -4,16 +4,17 @@ import java.util.ArrayList;
 
 public class Room {		
 	//private Object picture;
-	private List<String> current_tenants=new ArrayList<String>();
+	private List<String> current_tenants;
 	private String condition;
 	private int price;	
 	private boolean occupied;
 	private int roomNumber;
 	
-	public Room(int room_number, String current_tenant, String condition, int price) {		
-		this.current_tenants.add(current_tenant);		
+	public Room(int room_number, String condition, int price) {		
+		current_tenants=new ArrayList<String>();
 		this.condition=condition;
 		this.price=price;
+		occupied=false;
 	}
 	
 	@Override
@@ -24,4 +25,20 @@ public class Room {
 				", condition: "+condition+
 				", price: "+price;
 	}	
+	
+	public int getRoomNumber(){
+		return roomNumber;
+	}
+	
+	public void setOccupied(boolean occupied){
+		this.occupied=occupied;
+	}
+	
+	public void addToCurrentTenants(String current_tenant){
+		this.current_tenants.add(current_tenant);	
+	}
+	
+	public void removeFromCurrentTenants(String name_of_left){
+		this.current_tenants.remove(name_of_left);
+	}
 }
