@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Scanner;
 
 public class ServerThread extends Thread{	
@@ -85,6 +88,7 @@ public class ServerThread extends Thread{
 	    private void sendBlockChainToClient(){
 	    	
 	    }  
+	    
 	    
 	
 }
