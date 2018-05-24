@@ -3,25 +3,28 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class SuperServer {
 
-	private Floor floor1;
-	private Floor floor2;
-	private Floor floor3;
-	private Scanner scanner;
-	private ServerSocket ss; 
-	private PrintWriter print;
+	private static Floor floor1;
+	private static Floor floor2;
+	private static Floor floor3;
+	private static Scanner scanner;
+	private static ServerSocket ss; 
+	private static PrintWriter print;
 	
-	public final static int PORT_NUMBER_SUPERSERVER=12346;
+	public final static int PORT_NUMBER_SUPERSERVER=13347;
 	
 	public SuperServer(){
 		
 	}
-	private void fillTheRoomsAndFloors(){
+	private static void fillTheRoomsAndFloors(){
 		List<Room> rooms1=new ArrayList<>();
 		List<Room> rooms2=new ArrayList<>();
 		List<Room> rooms3=new ArrayList<>();
@@ -42,11 +45,11 @@ public class SuperServer {
 		floor1=new Floor(rooms2, 2, "Assistant Second");
 		floor1=new Floor(rooms3, 3, "Assistant Third");
 	}
-	private String showAllRooms(){
+	private static String showAllRooms(){
 		return "1: "+floor1.printTheFloorInfo()+"\n2: "+floor2.printTheFloorInfo()+"\n3"+floor3.printTheFloorInfo();
 	}
 	
-	private String occupyRoom(int number_needed_of_room, String name_of_occupant){
+	private static String occupyRoom(int number_needed_of_room, String name_of_occupant){
 		for (Room room: floor1.getRoomsPerFloor()){
 			if (room.getRoomNumber()==number_needed_of_room){
 				room.addToCurrentTenants(name_of_occupant);
@@ -57,7 +60,7 @@ public class SuperServer {
 		return showAllRooms();
 	}
 	
-    private String leaveRoom(int number_needed_of_room, String name_of_left){
+    private static String leaveRoom(int number_needed_of_room, String name_of_left){
     	for (Room room: floor1.getRoomsPerFloor()){
 			if (room.getRoomNumber()==number_needed_of_room){
 				room.removeFromCurrentTenants(name_of_left);
@@ -68,14 +71,15 @@ public class SuperServer {
 		return showAllRooms();
 	}
     
-    private void getAnswerFromServer(){
+    private static void getAnswerFromServer(){
     	String smthFromClient=null;
     	String nameOfClient;
     	int numberOfNeededRoom;
-    	int choice;
-
+    	int choice;    	
+    	
     	Socket s=null;
     	try{
+    		ss=new ServerSocket(PORT_NUMBER_SUPERSERVER);
     		s = ss.accept();
     	}catch(Exception e){
     		System.out.println(e);
@@ -90,11 +94,19 @@ public class SuperServer {
     	try{
 	    	scanner = new Scanner(s.getInputStream());
 	    	smthFromClient = scanner.nextLine();
-	    	
+	    	System.out.println("Good day! We recived the following response from you: "+smthFromClient);
 	    	} catch (Exception e){
 	    		System.out.println(e.getMessage());;
 	    	} finally{
 	    		scanner.close();
+	    		try {
+					s.close();
+					ss.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	    		
 	    	}
     	
     	String[] parts=smthFromClient.split(";");
@@ -107,16 +119,36 @@ public class SuperServer {
     	case 1: responseToClient=showAllRooms();
     	case 2: responseToClient=occupyRoom(numberOfNeededRoom, nameOfClient);
     	case 3: responseToClient=leaveRoom(numberOfNeededRoom, nameOfClient);
-    	default: responseToClient=new String("Please, choose a number from the given range");    	
+    	default: responseToClient=new String("The input from client was not proper and didn't match the given range");    	
     	}
     	
     	print.println(responseToClient);
     	print.flush();
     }
     
-    public /*static*/ void main (String[] args){
+    private static void deployRMI(){
+    	if (System.getSecurityManager() == null) {
+            System.setSecurityManager(new SecurityManager());
+        }
+        try {
+            String name = "calculatePrice";
+            Computation engine = new ComputationEngine();
+            //This makes remote objects available to clients
+            Computation stub =
+                (Computation) UnicastRemoteObject.exportObject(engine, 0);
+            Registry registry = LocateRegistry.getRegistry();
+            registry.rebind(name, stub);
+            System.out.println("ComputeEngine bound");
+        } catch (Exception e) {
+            System.err.println("ComputeEngine exception:");
+            e.printStackTrace();
+        }
+    }    
+    
+    public static void main (String[] args){
     	fillTheRoomsAndFloors();
     	getAnswerFromServer();
+    	//deployRMI();
     }
 
 }

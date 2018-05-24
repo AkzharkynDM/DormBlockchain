@@ -22,25 +22,5 @@ public class ComputationEngine implements Computation{
 		if (room.getCondition().contains("decent"))
 			price=-5000;
 		return price;
-	}
-	
-	//Here it plays a role of Server
-	public static void main(String[] args) {
-        if (System.getSecurityManager() == null) {
-            System.setSecurityManager(new SecurityManager());
-        }
-        try {
-            String name = "calculatePrice";
-            Computation engine = new ComputationEngine();
-            //This makes remote objects available to clients
-            Computation stub =
-                (Computation) UnicastRemoteObject.exportObject(engine, 0);
-            Registry registry = LocateRegistry.getRegistry();
-            registry.rebind(name, stub);
-            System.out.println("ComputeEngine bound");
-        } catch (Exception e) {
-            System.err.println("ComputeEngine exception:");
-            e.printStackTrace();
-        }
-    }
+	}        
 }

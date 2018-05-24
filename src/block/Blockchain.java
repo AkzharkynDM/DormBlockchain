@@ -1,4 +1,4 @@
-package server;
+package block;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -13,14 +13,16 @@ public class Blockchain {
 	
 	public Blockchain(){
 		 blockchainlist=new ArrayList<Block>();
+		 createGenesisBlock();
 	}
 	
 	private Block getGenesisBlock() {
 	    return new Block(0, "0".getBytes(), new Date(), "Genesis block", "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7".getBytes());
 	}
 	
-	public void createGenesisBlock(){
+	private void createGenesisBlock(){
 		blockchainlist.add(getGenesisBlock());
+		previousBlock=getGenesisBlock();
 	}
 	public String addToBlockchain(Block block){
 		if (isValidNewBlock(block, getLatestBlock())){

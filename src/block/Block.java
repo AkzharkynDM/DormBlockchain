@@ -1,4 +1,4 @@
-package client;
+package block;
 import java.util.Date;
 
 public class Block {

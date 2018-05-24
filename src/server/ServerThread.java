@@ -2,6 +2,7 @@ package server;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.rmi.RemoteException;
@@ -9,14 +10,17 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Scanner;
 
+import block.*;
+
 public class ServerThread extends Thread{	
 		private ObjectInputStream ois;
+		private ObjectOutputStream oos;
 	    private Object lock;
 	    private Socket s;    
 	    private PrintWriter print;
 		private Blockchain blockchain;
-		private Scanner scanner;
-		private int choiceOfClient;
+		//private Scanner scanner;
+		private String choiceOfClient;
 		
 		private Socket supersocket;
 		
@@ -31,20 +35,27 @@ public class ServerThread extends Thread{
 	    	synchronized(lock){
 	    		getChoiceFromClient();
 	    		sendChoiceToSuperServer();
-	    		getBlockFromClient();
+	    		//getBlockFromClient();
 	    		sendBlockChainToClient();
 	    	}
 	    }
 	    
 	    private void getChoiceFromClient(){
 	    	try{
-	    	scanner = new Scanner(s.getInputStream());
-	    	choiceOfClient = scanner.nextInt();
 	    	
+	    	ois=new ObjectInputStream(s.getInputStream());
+	    	Block blockFromClient=(Block) ois.readObject();
+	    	choiceOfClient=blockFromClient.getData();
+	    	System.out.println("Thank you! The server received the following request from the client: "+choiceOfClient);
 	    	} catch (Exception e){
 	    		System.out.println(e.getMessage());;
 	    	} finally{
-	    		scanner.close();
+	    		try {
+					ois.close();
+				} catch (IOException e) {
+					System.out.println("Cannot close Object Input Stream properly");
+					e.printStackTrace();
+				}
 	    	}
 	    	
 	    }
@@ -61,7 +72,7 @@ public class ServerThread extends Thread{
 	    	
 	    }
 
-	    private void getBlockFromClient(){
+	    /*private void getBlockFromClient(){
 	    	try{       
 
 		        ois = new ObjectInputStream(s.getInputStream());        
@@ -83,10 +94,17 @@ public class ServerThread extends Thread{
 				}
 		    	  
 		      }
-	    }
+	    }*/
 	    
-	    private void sendBlockChainToClient(){
-	    	
+	    private void sendBlockChainToClient(){	    	
+	    	try {
+	    		oos=new ObjectOutputStream(s.getOutputStream());	    	
+				oos.writeObject(blockchain);
+			} catch (IOException e) {
+				System.out.println("Error with sending the blockchain from server to client");
+				e.printStackTrace();
+			}
+	    	System.out.println("The server wrote the client back/sent the blockchain");
 	    }  
 	    
 	    

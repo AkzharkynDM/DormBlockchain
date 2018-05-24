@@ -8,16 +8,18 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 
+import block.*;
+
 public class Server{
-  public final static int PORT_NUMBER_CLIENT=12345;
-  public final static int PORT_NUMBER_SUPERSERVER=12346;
+  public final static int PORT_NUMBER_CLIENT=13348;
+  public final static int PORT_NUMBER_SUPERSERVER=13347;
   public final static String LOCAL_HOST="localhost";
-  private ServerSocket ss; 
-  private Blockchain blockchain;
+  private static ServerSocket ss; 
+  private static Blockchain blockchain;
   
-  private Socket supersocket;
+  private static Socket supersocket;
   
-  private void connectToClients(){
+  private static void connectToClients(){
 	  blockchain=new Blockchain();
 	  
       Object lock = new Object();
@@ -29,27 +31,31 @@ public class Server{
         }
 
       }catch(Exception e){
+    	  System.out.println("Server cannot connect to clients");
         System.out.println(e);
       } finally{
     	  try {
 			ss.close();
 		} catch (IOException e) {
-			System.out.println(e);
+			System.out.println("The server cannot close the connection to client "+e.getMessage());			
 		}
       }
   }
   
-  private void connectToSuperServer(){
+  private static void connectToSuperServer(){
 	  try {
 		supersocket=new Socket(LOCAL_HOST, PORT_NUMBER_SUPERSERVER);
 	} catch (UnknownHostException e) {	
+		System.out.println("Server cannot connect to superserver");
 		e.printStackTrace();
-	} catch (IOException e) {	
+	} catch (IOException e) {
+		System.out.println("Server cannot connect to superserver");
 		e.printStackTrace();
 	} finally{
 		try {
 			supersocket.close();
-		} catch (IOException e) {			
+		} catch (IOException e) {	
+			System.out.println("The server cannot close the connection to superserver");
 			e.printStackTrace();
 		}
 	}
@@ -68,9 +74,11 @@ public class Server{
   	  System.out.println(calculator.calculatePrice(desiredRoom));
     }
   
-  public /*static*/ void main (String[] args){
+  public static void main (String[] args){
+	  //TODO: The order seems to be important here -> need to review code from "Computer Networks" class
 	  connectToSuperServer();
-	  connectToClients();
+	  connectToClients();  
+	  
   }
 }
 
