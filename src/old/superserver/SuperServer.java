@@ -9,6 +9,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 public class SuperServer {
 
@@ -18,12 +19,12 @@ public class SuperServer {
 	private static Scanner scanner;
 	private static ServerSocket ss; 
 	private static PrintWriter print;
+	private static Socket s;
+	public final static int PORT_NUMBER_SUPERSERVER=14347;
 	
-	public final static int PORT_NUMBER_SUPERSERVER=13347;
-	
-	public SuperServer(){
+	//public SuperServer(){
 		
-	}
+	//}
 	private static void fillTheRoomsAndFloors(){
 		List<Room> rooms1=new ArrayList<>();
 		List<Room> rooms2=new ArrayList<>();
@@ -71,50 +72,30 @@ public class SuperServer {
 		return showAllRooms();
 	}
     
-    private static void getAnswerFromServer(){
+    private static void getAnswerFromServerAndSendInfo(){
     	String smthFromClient=null;
     	String nameOfClient;
     	int numberOfNeededRoom;
-    	int choice;    	
+    	int choice;    	    	
     	
-    	Socket s=null;
     	try{
     		ss=new ServerSocket(PORT_NUMBER_SUPERSERVER);
+    		System.out.println("Listening on port " + ss.getLocalPort());
     		s = ss.accept();
-    	}catch(Exception e){
-    		System.out.println(e);
-    	} finally{
-    	  try {
-			ss.close();
-		} catch (IOException e) {
-			System.out.println(e);
-		}
-      }
-      
-    	try{
-	    	scanner = new Scanner(s.getInputStream());
+    		TimeUnit.SECONDS.sleep(30); // half a minute
+    		do {
+    		scanner = new Scanner(s.getInputStream());
 	    	smthFromClient = scanner.nextLine();
-	    	System.out.println("Good day! We recived the following response from you: "+smthFromClient);
-	    	} catch (Exception e){
-	    		System.out.println(e.getMessage());;
-	    	} finally{
-	    		scanner.close();
-	    		try {
-					s.close();
-					ss.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-	    		
-	    	}
+	    	System.out.println("Good day! We received the following response from you: "+smthFromClient); 	
+    		}
+	    	while (scanner.hasNext());
     	
     	String[] parts=smthFromClient.split(";");
     	choice=Integer.parseInt(parts[0]);
     	numberOfNeededRoom=Integer.parseInt(parts[1]);
     	nameOfClient=parts[2];
     	
-    	String responseToClient="ERROR. Connection is refused";
+    	String responseToClient="ERROR. Connection from server to superserver is refused";
     	switch(choice){
     	case 1: responseToClient=showAllRooms();
     	case 2: responseToClient=occupyRoom(numberOfNeededRoom, nameOfClient);
@@ -122,8 +103,24 @@ public class SuperServer {
     	default: responseToClient=new String("The input from client was not proper and didn't match the given range");    	
     	}
     	
+    	print=new PrintWriter(s.getOutputStream());
     	print.println(responseToClient);
     	print.flush();
+    		
+    	}catch(Exception e){
+    		System.out.println("Cannot create the socket for superserver-server connection properly");
+    		System.out.println(e);
+    	} finally{
+    		scanner.close();
+    		print.close();
+    	  try {
+    		  s.close();
+    		  ss.close();
+		} catch (IOException e) {
+			System.out.println("Cannot close the socket for superserver-server connection properly");
+			System.out.println(e);
+		}
+      }
     }
     
     private static void deployRMI(){
@@ -147,7 +144,7 @@ public class SuperServer {
     
     public static void main (String[] args){
     	fillTheRoomsAndFloors();
-    	getAnswerFromServer();
+    	getAnswerFromServerAndSendInfo();
     	//deployRMI();
     }
 
